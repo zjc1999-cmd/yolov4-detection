@@ -5,7 +5,6 @@ import torch.nn as nn
 
 
 #-------------------------------------------------#
-#   卷积块
 #   Conv2d + BatchNorm2d + LeakyReLU
 #-------------------------------------------------#
 class BasicConv(nn.Module):
@@ -45,11 +44,7 @@ class BasicConv(nn.Module):
                       |
                  MaxPooling2D
 '''
-#---------------------------------------------------#
-#   CSPdarknet53-tiny的结构块
-#   存在一个大残差边
-#   这个大残差边绕过了很多的残差结构
-#---------------------------------------------------#
+
 class Resblock_body(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(Resblock_body, self).__init__()
@@ -64,36 +59,36 @@ class Resblock_body(nn.Module):
         self.maxpool = nn.MaxPool2d([2,2],[2,2])
 
     def forward(self, x):
-        # 利用一个3x3卷积进行特征整合
+      
         x = self.conv1(x)
-        # 引出一个大的残差边route
+        
         route = x
         
         c = self.out_channels
-        # 对特征层的通道进行分割，取第二部分作为主干部分。
+        
         x = torch.split(x, c//2, dim = 1)[1]
-        # 对主干部分进行3x3卷积
+        
         x = self.conv2(x)
-        # 引出一个小的残差边route_1
+        
         route1 = x
-        # 对第主干部分进行3x3卷积
+        
         x = self.conv3(x)
-        # 主干部分与残差部分进行相接
+        
         x = torch.cat([x,route1], dim = 1) 
 
-        # 对相接后的结果进行1x1卷积
+       
         x = self.conv4(x)
         feat = x
         x = torch.cat([route, x], dim = 1)
         
-        # 利用最大池化进行高和宽的压缩
+        
         x = self.maxpool(x)
         return x,feat
 
 class CSPDarkNet(nn.Module):
     def __init__(self):
         super(CSPDarkNet, self).__init__()
-        # 首先利用两次步长为2x2的3x3卷积进行高和宽的压缩
+       
         # 416,416,3 -> 208,208,32 -> 104,104,64
         self.conv1 = BasicConv(3, 32, kernel_size=3, stride=2)
         self.conv2 = BasicConv(32, 64, kernel_size=3, stride=2)
@@ -108,7 +103,7 @@ class CSPDarkNet(nn.Module):
         self.conv3 = BasicConv(512, 512, kernel_size=3)
 
         self.num_features = 1
-        # 进行权值初始化
+        
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
