@@ -1,0 +1,2 @@
+# yolov4-detection
+Source code for the paper "AUTOMATIC IDENTIFICATION OF KURIL HABOR SEALS (Phoca vitulina stejnegeri) IN UNDERWATER VIDEO FOOTAGE RECORDED AT A SALMON SET-NETS“
