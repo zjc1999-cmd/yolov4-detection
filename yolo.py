@@ -6,10 +6,7 @@ from nets.attention import cbam_block, eca_block, se_block, CA_Block
 
 attention_block = [se_block, cbam_block, eca_block, CA_Block]
 
-#-------------------------------------------------#
-#   卷积块 -> 卷积 + 标准化 + 激活函数
-#   Conv2d + BatchNormalization + LeakyReLU
-#-------------------------------------------------#
+
 class BasicConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1):
         super(BasicConv, self).__init__()
@@ -24,9 +21,7 @@ class BasicConv(nn.Module):
         x = self.activation(x)
         return x
 
-#---------------------------------------------------#
-#   卷积 + 上采样
-#---------------------------------------------------#
+
 class Upsample(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(Upsample, self).__init__()
@@ -40,9 +35,7 @@ class Upsample(nn.Module):
         x = self.upsample(x)
         return x
 
-#---------------------------------------------------#
-#   最后获得yolov4的输出
-#---------------------------------------------------#
+
 def yolo_head(filters_list, in_filters):
     m = nn.Sequential(
         BasicConv(in_filters, filters_list[0], 3),
@@ -70,11 +63,7 @@ class YoloBody(nn.Module):
             self.upsample_att   = attention_block[self.phi - 1](128)
 
     def forward(self, x):
-        #---------------------------------------------------#
-        #   生成CSPdarknet53_tiny的主干模型
-        #   feat1的shape为26,26,256
-        #   feat2的shape为13,13,512
-        #---------------------------------------------------#
+        
         feat1, feat2 = self.backbone(x)
         if 1 <= self.phi and self.phi <= 4:
             feat1 = self.feat1_att(feat1)
